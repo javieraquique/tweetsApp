@@ -6,7 +6,7 @@ import os
 import json
 from dotenv import load_dotenv
 import requests
-import plotly.express as px
+import matplotlib.pyplot as plt
 
 
 def bearer_oauth(r):
@@ -41,17 +41,11 @@ def main():
 
     st.title('The lastest 100 tweets in English')
 
-    # DATE_COLUMN = 'date/time'
-    # DATA_URL = ('https://s3-us-west-2.amazonaws.com/'
-    #             'streamlit-demo-data/uber-raw-data-sep14.csv.gz')
-
     @st.cache
     def load_data():
         json_response = connect_to_endpoint(search_url, query_params)
         data = pd.DataFrame.from_dict(json_response['data'])
-        # lowercase = lambda x: str(x).lower()
-        # data.rename(lowercase, axis='columns', inplace=True)
-        # data[DATE_COLUMN] = pd.to_datetime(data[DATE_COLUMN])
+        data['number'] = 1
         return data
 
     data_load_state = st.text('Loading data...')
@@ -60,7 +54,11 @@ def main():
 
 
     st.subheader('Number of twitts by hour')
-    st.bar_chart(data['lang'])
+    chart_data = pd.DataFrame(
+        list(data['lang'].value_counts()),
+        columns=["Twitt's language"]
+    )
+    st.bar_chart(chart_data)
     st.dataframe(data)
 
 
