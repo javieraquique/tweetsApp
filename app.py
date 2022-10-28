@@ -1,4 +1,3 @@
-from tkinter import Y
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -6,7 +5,8 @@ import os
 import json
 from dotenv import load_dotenv
 import requests
-import matplotlib.pyplot as plt
+from dateutil import parser
+import datetime as dt
 
 
 def bearer_oauth(r):
@@ -56,11 +56,27 @@ def main():
 
     values = list(data['lang'].value_counts())
     columns = data['lang'].value_counts().index.to_list()
+    
     chart_data = pd.DataFrame(values, columns)
     chart_data = chart_data.rename(columns={0: "Number of twitts"})
 
     st.bar_chart(chart_data)
+
+    st.subheader('Timeline')
+
+    data['time'] = pd.to_datetime(data['created_at'])
+
+    values = list(data['time'].value_counts())
+    columns = data['time'].value_counts().index.to_list()
+    
+    chart_data = pd.DataFrame(values, columns)
+    chart_data = chart_data.rename(columns={0: "Number of twitts"})
+
+    st.line_chart(chart_data)
+
     st.dataframe(data)
+
+    
 
 
 if __name__ == "__main__":
