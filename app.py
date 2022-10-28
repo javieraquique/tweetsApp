@@ -45,7 +45,6 @@ def main():
     def load_data():
         json_response = connect_to_endpoint(search_url, query_params)
         data = pd.DataFrame.from_dict(json_response['data'])
-        data['number'] = 1
         return data
 
     data_load_state = st.text('Loading data...')
@@ -53,11 +52,13 @@ def main():
     data_load_state.text("Data loaded and ready!")
 
 
-    st.subheader('Number of twitts by hour')
-    chart_data = pd.DataFrame(
-        list(data['lang'].value_counts()),
-        columns=["Twitt's language"]
-    )
+    st.subheader('Distribution by language')
+
+    values = list(data['lang'].value_counts())
+    columns = data['lang'].value_counts().index.to_list()
+    chart_data = pd.DataFrame(values, columns)
+    chart_data = chart_data.rename(columns={0: "Number of twitts"})
+
     st.bar_chart(chart_data)
     st.dataframe(data)
 
