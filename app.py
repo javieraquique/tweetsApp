@@ -1,16 +1,12 @@
 import streamlit as st
+import spacy
 import pandas as pd
 import numpy as np
 import os
 import requests
 import datetime as dt
-import spacy
 import plotly.express as px
 import plotly.graph_objects as go
-
-
-
-
 
 def bearer_oauth(r):
     """
@@ -130,11 +126,6 @@ def main():
 
     st.plotly_chart(fig, use_container_width=True)
 
-
-
-
-
-    # si
 
 if __name__ == "__main__":
     main()
