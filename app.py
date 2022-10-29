@@ -28,7 +28,11 @@ def connect_to_endpoint(url, params):
         raise Exception(response.status_code, response.text)
     return response.json()
 
-bearer_token = os.getenv("BEARER_TOKEN")
+st.write(
+	"Has environment variables been set:",
+	os.environ["BEARER_TOKEN"] == st.secrets["BEARER_TOKEN"])
+
+bearer_token = os.environ["BEARER_TOKEN"]
 
 search_url = "https://api.twitter.com/2/tweets/search/recent"
 
