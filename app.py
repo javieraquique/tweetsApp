@@ -9,6 +9,29 @@ import plotly.express as px
 import plotly.graph_objects as go
 import en_core_web_sm
 
+# Definir tema
+st.set_page_config(
+page_title="Latest 100 twitts",
+page_icon="🤖",
+layout="wide")
+
+# Extraer el token de acceso a la API de twitter
+# os.environ["BEARER_TOKEN"] == st.secrets["BEARER_TOKEN"]
+
+# Asgina el secreto a la variable secreto
+bearer_token = os.environ["BEARER_TOKEN"]
+
+# Asigna la URL de la API de twitter a una variable
+search_url = "https://api.twitter.com/2/tweets/search/recent"
+
+# Establece los parámetros de búsqueda en la API y campos a retornar
+query_params = {
+    'query': 'lang=en',
+    'place.fields': 'contained_within,country,country_code,full_name,geo,id,name,place_type',
+    'tweet.fields': 'author_id,created_at,geo,id,lang,possibly_sensitive,source,text,withheld',
+    'user.fields': 'id,location,name,protected,username,verified,withheld',
+    'max_results': 100}
+
 def bearer_oauth(r):
     """
     Method required by bearer token authentication.
@@ -19,31 +42,22 @@ def bearer_oauth(r):
     return r
 
 def connect_to_endpoint(url, params):
+    '''
+    Esta función se conecta al punto de acceso de la API
+    a través de los argumentos url y params establecidos al
+    inicio del programa
+    '''
     response = requests.get(url, auth=bearer_oauth, params=params)
     print(response.status_code)
     if response.status_code != 200:
         raise Exception(response.status_code, response.text)
     return response.json()
 
-st.write(
-	"Has environment variables been set:",
-	os.environ["BEARER_TOKEN"] == st.secrets["BEARER_TOKEN"])
-
-bearer_token = os.environ["BEARER_TOKEN"]
-
-search_url = "https://api.twitter.com/2/tweets/search/recent"
-
-query_params = {
-    'query': 'lang=en',
-    'place.fields': 'contained_within,country,country_code,full_name,geo,id,name,place_type',
-    'tweet.fields': 'author_id,created_at,geo,id,lang,possibly_sensitive,source,text,withheld',
-    'user.fields': 'id,location,name,protected,username,verified,withheld',
-    'max_results': 100}
-
 def main():
-    
-    # Se escribe el título
-    st.title('The lastest 100 tweets in English')
+
+    '''
+    Función principal de la aplicación
+    '''
 
     # Se crea una función para cargar los datos con un decorador de cache
     @st.cache(allow_output_mutation=True)
@@ -61,21 +75,73 @@ def main():
     #Se muestra el mensaje indicando que se han cargados los datos correctamente
     data_load_state.text("Data loaded and ready!")
 
-    # Se escribe subtítulo para visualización de distribución por idioma
-    st.subheader('Distribution by language')
+    # Primera planta
+    with st.container():
+        col1, col2 = st.columns([0.4, 1])
+        
+        with col1:
+            st.image("tweetsapp-low-resolution-logo-color-on-transparent-background.png")
 
-    # Se almacenan los datos de idioma de cada tiwtt y las vece que se repiten en dos listas
-    values = list(data['lang'].value_counts())
-    columns = data['lang'].value_counts().index.to_list()
-    
-    # Se almacenan ambas listas en un Data Frame de nombe chart_data
-    chart_data = pd.DataFrame(values, columns)
+        with col2:
+            title_alignment = "<h1 style='text-align: right;'>The lastest 100 tweets</h1>"
+            st.markdown(title_alignment, unsafe_allow_html=True)
+            # st.title('The lastest 100 tweets')
+            
+    st.header("This app pulls the lastest 100 twitts form the Twitter's Api")
 
-    # Se cambia el nombre de la columna
-    chart_data = chart_data.rename(columns={0: "Number of twitts"})
-    
-    # Se genera el gráfico de barras para la distribución por idioma
-    st.bar_chart(chart_data)
+    # Segunda planta
+    col1, col2 = st.columns([0.3, 0.7])
+
+    with col1:
+        st.subheader('Distribution by language')
+        st.write('''
+            This is the distribution of tweets by their language.
+            ZXX means the language is unknown
+            ''')
+
+    with col2:
+        # Se escribe subtítulo para visualización de distribución por idioma
+        # st.subheader('Distribution by language')
+            # Se almacenan los datos de idioma de cada tiwtt y las vece que se repiten en dos listas
+        values = list(data['lang'].value_counts())
+        columns = data['lang'].value_counts().index.to_list()
+        
+        # Se almacenan ambas listas en un Data Frame de nombe chart_data
+        chart_data = pd.DataFrame(values, columns)
+
+        # Se cambia el nombre de la columna
+        chart_data = chart_data.rename(columns={0: "Number of twitts"})
+        
+        # Se genera el gráfico de barras para la distribución por idioma
+        st.bar_chart(chart_data)
+
+    # Tercera planta
+    col1, col2 = st.columns([0.7, 0.3])
+
+    with col2:
+        st.subheader('Description')
+        st.write('''
+            This is the distribution of tweets by their source.
+            E.G. a phone, a computer or which app.
+            ''')
+
+    with col1:
+        # Se escribe subtítulo para visualización de distribución por fuente
+        st.subheader('Distribution by source')
+            # Se almacenan los datos de idioma de cada tiwtt y las vece que se repiten en dos listas
+
+        values = list(data['source'].value_counts())
+        columns = data['source'].value_counts().index.to_list()
+        
+        # Se almacenan ambas listas en un Data Frame de nombe chart_data
+        chart_data = pd.DataFrame(values, columns)
+
+        # Se cambia el nombre de la columna
+        chart_data = chart_data.rename(columns={0: "Number of twitts"})
+        
+        # Se genera el gráfico de barras para la distribución por fuente
+        fig = px.pie(data, names='source')
+        st.plotly_chart(fig)
 
     # Se genera título de línea de tiempo
     st.subheader('Timeline')
