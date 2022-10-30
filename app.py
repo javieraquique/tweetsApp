@@ -7,6 +7,7 @@ import requests
 import datetime as dt
 import plotly.express as px
 import plotly.graph_objects as go
+import en_core_web_sm
 
 def bearer_oauth(r):
     """
@@ -96,8 +97,7 @@ def main():
     st.line_chart(chart_data)
 
     # Lista de palabras a exlcuir
-    # nlp = English
-    nlp = spacy.load("en_core_web_sm")
+    nlp = en_core_web_sm.load()
     excluded_tags = {"SYM", "PUNCT", "PART", "AUX", "CCONJ", "PRON", "NOUN", "ADV", "ADP", "PROPN"}
     banned = ["the", "a"]
 
@@ -116,7 +116,6 @@ def main():
     top_rated = top_rated.reset_index()
     top_rated = top_rated.sort_values(by=[0], ascending=True)
     
-    # print(top_rated)
     #Creando gráfico de barras con las palabras más repetidas
     fig = go.Figure(go.Bar(
 
